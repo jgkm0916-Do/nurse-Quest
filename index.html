@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>NurseQuest — 나만의 간호 여정</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="src/styles/main.css"/>
+</head>
+<body>
+
+<!-- ════════════════════════════════
+  화면 1: 시작
+════════════════════════════════ -->
+<div id="screen-start" class="screen active">
+  <div class="start-bg">
+    <div class="bg-orb orb1"></div>
+    <div class="bg-orb orb2"></div>
+  </div>
+  <div class="start-content">
+    <div class="start-char-area">
+      <div class="start-sparkles">
+        <span class="sp sp1">✦</span><span class="sp sp2">✦</span>
+        <span class="sp sp3">✦</span><span class="sp sp4">✦</span>
+      </div>
+      <img src="images/Stage1.png" alt="신규 간호사" class="start-char-img" id="startCharImg"/>
+    </div>
+    <div class="start-text">
+      <div class="start-logo">NurseQuest</div>
+      <h1 class="start-title">신규 간호사의<br><em>첫 번째 여정</em>이 시작됩니다</h1>
+      <p class="start-sub">퀘스트를 클리어하며 임상 판단력을 키우고<br>나만의 간호 철학을 완성해가세요</p>
+    </div>
+    <div class="start-form">
+      <label class="form-label" for="nurseNameInput">이름 또는 닉네임</label>
+      <input id="nurseNameInput" class="form-input" type="text"
+             placeholder="예: 김도은 간호사" maxlength="12"
+             onkeydown="if(event.key==='Enter') startApp()"/>
+      <button class="btn-start" onclick="startApp()">여정 시작하기 →</button>
+      <p class="form-note">진행 상황은 이 기기에 자동 저장됩니다</p>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════
+  화면 2: 메인 앱
+════════════════════════════════ -->
+<div id="screen-app" class="screen">
+
+  <!-- HUD -->
+  <header class="hud">
+    <div class="hud-logo">NurseQuest</div>
+    <div class="hud-center">
+      <div class="hud-stage-row">
+        <span class="hud-stage-label">STAGE</span>
+        <span class="hud-stage-num" id="hudStageNum">1</span>
+        <span class="hud-stage-name" id="hudStageName">새내기 간호사</span>
+      </div>
+      <div class="hud-xp-bar"><div class="hud-xp-fill" id="hudXpFill" style="width:0%"></div></div>
+      <div class="hud-xp-text" id="hudXpText">0 / 100 XP</div>
+    </div>
+    <div class="hud-right">
+      <div class="hud-stat"><span class="hud-stat-icon">🔥</span><strong id="hudStreak">0</strong></div>
+      <div class="hud-stat"><span class="hud-stat-icon">✓</span><strong id="hudCleared">0</strong></div>
+    </div>
+  </header>
+
+  <!-- 탭 -->
+  <nav class="tab-nav">
+    <button class="tab-btn active" onclick="switchTab('map',this)">🗺 퀘스트 맵</button>
+    <button class="tab-btn" onclick="switchTab('character',this)">👩‍⚕️ 내 성장</button>
+    <button class="tab-btn" onclick="switchTab('notes',this)">📋 학습 노트</button>
+  </nav>
+
+  <!-- 탭: 퀘스트 맵 -->
+  <div id="tab-map" class="tab-content active">
+    <div class="section-head">
+      <div class="section-title">퀘스트 맵</div>
+      <div class="section-sub">순서대로 클리어하며 임상 판단력을 키워가세요</div>
+    </div>
+    <div id="chapterList"></div>
+  </div>
+
+  <!-- 탭: 내 성장 -->
+  <div id="tab-character" class="tab-content">
+
+    <!-- 캐릭터 카드 -->
+    <div class="char-card">
+      <div class="char-card-left">
+        <div class="char-img-frame">
+          <img id="charCardImg" src="images/Stage1.png" alt="내 캐릭터" class="char-card-img"/>
+          <div class="char-glow" id="charGlow"></div>
+        </div>
+        <div class="char-stage-badge" id="charStageBadge">STAGE 1</div>
+        <div class="char-stage-title" id="charStageTitle">새내기 간호사</div>
+        <div class="char-stage-desc" id="charStageDesc">설레임과 긴장이 공존하는 시작</div>
+        <div class="char-xp-wrap">
+          <div class="char-xp-bar"><div class="char-xp-fill" id="charXpFill" style="width:0%"></div></div>
+          <div class="char-xp-text" id="charXpText">0 / 100 XP</div>
+        </div>
+      </div>
+      <div class="char-card-right">
+        <div class="radar-label">능력치 성장</div>
+        <canvas id="radarChart" width="200" height="200"></canvas>
+        <div id="statBars"></div>
+      </div>
+    </div>
+
+    <!-- 성장 여정 트랙 -->
+    <div class="growth-section">
+      <div class="growth-title">✦ 성장 여정</div>
+      <div class="growth-track" id="growthTrack"></div>
+    </div>
+
+    <!-- 아이템 -->
+    <div class="items-section">
+      <div class="items-title">✦ 성장의 동반 아이템</div>
+      <div class="items-grid" id="itemsGrid"></div>
+    </div>
+
+  </div>
+
+  <!-- 탭: 학습 노트 -->
+  <div id="tab-notes" class="tab-content">
+    <div class="section-head">
+      <div class="section-title">학습 노트</div>
+      <div class="section-sub">퀘스트를 클리어하면 핵심 내용이 자동으로 기록돼요</div>
+    </div>
+    <div id="notesList">
+      <div class="empty-state">📋<br><br>아직 기록된 노트가 없어요<br>퀘스트를 완료하면 여기 쌓여요</div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ════════════════════════════════
+  퀘스트 모달 (Bottom Sheet)
+════════════════════════════════ -->
+<div id="questModal" class="modal-overlay" onclick="closeModalOutside(event)">
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <div class="modal-header">
+      <div>
+        <div class="modal-meta" id="modalMeta">Chapter 1 · Quest 1</div>
+        <div class="modal-title" id="modalTitle">퀘스트</div>
+      </div>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div class="modal-body" id="modalBody"></div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════
+  화면 3: 최종 결과
+════════════════════════════════ -->
+<div id="screen-result" class="screen">
+  <div class="result-hero">
+    <div class="result-bg-orb"></div>
+    <div class="result-char-wrap">
+      <div class="result-char-glow"></div>
+      <img id="resultCharImg" src="images/Stage7.png" alt="결과 캐릭터" class="result-char-img"/>
+    </div>
+    <div class="result-persona-badge" id="resultBadge">임상판단 전문가</div>
+    <div class="result-persona-name" id="resultPersona">임상판단 전문가</div>
+    <div class="result-tags" id="resultTags"></div>
+    <div class="result-msg" id="resultMsg"></div>
+  </div>
+  <div class="result-body">
+    <div class="result-stats-wrap">
+      <div class="result-radar-label">최종 능력치</div>
+      <canvas id="resultRadar" width="240" height="240"></canvas>
+    </div>
+    <div class="philosophy-card">
+      <div class="philosophy-eyebrow">✦ 나의 간호 철학</div>
+      <div class="philosophy-text" id="resultPhilosophy"></div>
+    </div>
+    <button class="btn-primary" onclick="goBackToMap()">다시 맵으로 돌아가기</button>
+  </div>
+</div>
+
+<!-- ════════════════════════════════
+  레벨업 오버레이
+════════════════════════════════ -->
+<div id="levelupOverlay" class="lu-overlay">
+  <div class="lu-particles" id="luParticles"></div>
+  <div class="lu-box">
+    <div class="lu-ring"></div>
+    <div class="lu-label">STAGE UP!</div>
+    <div class="lu-char-frame">
+      <img id="luCharImg" src="images/Stage2.png" alt="레벨업 캐릭터" class="lu-char-img"/>
+    </div>
+    <div class="lu-stage-num" id="luStageNum">2</div>
+    <div class="lu-stage-name" id="luStageName">성장하는 간호사</div>
+    <div class="lu-stage-desc" id="luStageDesc">조금씩 익숙해지고 자신감이 생겨요</div>
+    <button class="lu-close-btn" onclick="closeLevelUp()">계속하기 →</button>
+  </div>
+</div>
+
+<script src="src/data/quests.js"></script>
+<script src="src/components/quest-engine.js"></script>
+<script src="src/components/app.js"></script>
+</body>
+</html>
