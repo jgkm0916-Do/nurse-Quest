@@ -258,7 +258,7 @@ function drawRadar(canvasId, stats, color) {
 
   // 라벨
   ctx.fillStyle = '#8b6f5e';
-  ctx.font      = '11px Noto Sans KR, sans-serif';
+  ctx.font      = '11px Pretendard, sans-serif';
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
   keys.forEach((key, i) => {

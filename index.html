@@ -6,7 +6,8 @@
   <title>NurseQuest — 나만의 간호 여정</title>
   <link rel="preconnect" href="https://fonts.googleapis.com"/>
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
-  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Gowun+Dodum&family=Hahmlet:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css"/>
   <link rel="stylesheet" href="src/styles/main.css"/>
 </head>
 <body>
@@ -21,23 +22,31 @@
   </div>
   <div class="start-content">
     <div class="start-char-area">
-      <div class="start-sparkles">
+      <div class="start-sparkles" aria-hidden="true">
         <span class="sp sp1">✦</span><span class="sp sp2">✦</span>
         <span class="sp sp3">✦</span><span class="sp sp4">✦</span>
       </div>
-      <img src="images/Stage1.png" alt="신규 간호사" class="start-char-img" id="startCharImg"/>
+      <div class="start-char-frame">
+        <img src="images/Stage1.png" alt="신규 간호사" class="start-char-img" id="startCharImg"/>
+      </div>
+      <div class="start-level-badge">
+        <span class="start-lv">Lv.1</span>
+        <span class="start-lv-name">새내기 간호사</span>
+      </div>
     </div>
     <div class="start-text">
       <div class="start-logo">NurseQuest</div>
-      <h1 class="start-title">신규 간호사의<br><em>첫 번째 여정</em>이 시작됩니다</h1>
-      <p class="start-sub">퀘스트를 클리어하며 임상 판단력을 키우고<br>나만의 간호 철학을 완성해가세요</p>
+      <p class="start-logo-sub">간호사의 성장 RPG</p>
+      <h1 class="start-title">오늘부터 당신의<br><em>간호 여정</em>이 시작됩니다</h1>
+      <p class="start-sub">퀘스트를 수행하며<br>임상 판단력과 간호 철학을 성장시켜 보세요.</p>
     </div>
     <div class="start-form">
-      <label class="form-label" for="nurseNameInput">이름 또는 닉네임</label>
+      <label class="form-label" for="nurseNameInput">어떻게 불러드릴까요?</label>
       <input id="nurseNameInput" class="form-input" type="text"
-             placeholder="예: 김도은 간호사" maxlength="12"
+             placeholder="예) 이새싹" maxlength="12"
+             autocomplete="nickname"
              onkeydown="if(event.key==='Enter') startApp()"/>
-      <button class="btn-start" onclick="startApp()">여정 시작하기 →</button>
+      <button type="button" class="btn-start" onclick="startApp()">첫 퀘스트 시작하기 →</button>
       <p class="form-note">진행 상황은 이 기기에 자동 저장됩니다</p>
     </div>
   </div>
