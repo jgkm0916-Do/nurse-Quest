@@ -45,7 +45,9 @@
       <input id="nurseNameInput" class="form-input" type="text"
              placeholder="예) 이새싹" maxlength="12"
              autocomplete="nickname"
+             oninput="clearStartError()"
              onkeydown="if(event.key==='Enter') startApp()"/>
+      <p class="form-error" id="startFormError" aria-live="polite"></p>
       <button type="button" class="btn-start" onclick="startApp()">첫 퀘스트 시작하기 →</button>
       <p class="form-note">진행 상황은 이 기기에 자동 저장됩니다</p>
     </div>
@@ -53,7 +55,57 @@
 </div>
 
 <!-- ════════════════════════════════
-  화면 2: 메인 앱
+  화면 2: 에필로그
+════════════════════════════════ -->
+<div id="screen-epilogue" class="screen">
+  <div class="epi-shell">
+    <div class="epi-topbar">
+      <div class="epi-kicker">프롤로그</div>
+      <div class="epi-progress" aria-hidden="true">
+        <span class="epi-dot active"></span>
+        <span class="epi-dot"></span>
+        <span class="epi-dot"></span>
+        <span class="epi-dot"></span>
+      </div>
+    </div>
+
+    <div class="epi-scene-card">
+      <div class="epi-scene-media">
+        <img
+          id="epilogueSceneImg"
+          class="epi-scene-img"
+          src="file:///C:/Users/USER/.cursor/projects/d-DATA-Desktop-github-file-nursequest-final-nurse-Quest/assets/c__Users_USER_AppData_Roaming_Cursor_User_workspaceStorage_96bce07b1deb7afd727e628c6cdf8108_images____-1634f59f-8411-4446-975f-f73726bc05d9.png"
+          alt="신규 간호사가 수간호사와 인사하는 장면"
+        />
+        <div class="epi-scene-overlay"></div>
+      </div>
+
+      <div class="epi-dialogue-wrap">
+        <div class="epi-scene-label">첫 출근, 새로운 인연</div>
+        <div class="epi-bubble epi-bubble-narration" id="epilogueNarration">
+          <div class="epi-speaker">장면 설명</div>
+          <div class="epi-bubble-text" id="epilogueNarrationText"></div>
+        </div>
+        <div class="epi-bubble epi-bubble-head" id="epilogueHeadBubble">
+          <div class="epi-speaker">수간호사</div>
+          <div class="epi-bubble-text" id="epilogueHeadText"></div>
+        </div>
+        <div class="epi-bubble epi-bubble-player" id="epiloguePlayerBubble">
+          <div class="epi-speaker" id="epiloguePlayerSpeaker">신규 간호사</div>
+          <div class="epi-bubble-text" id="epiloguePlayerText"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="epi-actions">
+      <button type="button" class="epi-next-btn" id="epilogueNextBtn" onclick="nextEpilogueStep()">다음</button>
+      <button type="button" class="epi-skip-btn" onclick="skipEpilogue()">건너뛰고 맵 보기</button>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════
+  화면 3: 메인 앱
 ════════════════════════════════ -->
 <div id="screen-app" class="screen">
 
@@ -74,6 +126,10 @@
       <div class="hud-stat"><span class="hud-stat-icon">✓</span><strong id="hudCleared">0</strong></div>
     </div>
   </header>
+  <div class="revisit-nav">
+    <button type="button" class="revisit-btn" onclick="showStartScreen()">처음 화면 다시보기</button>
+    <button type="button" class="revisit-btn revisit-btn-accent" onclick="showEpilogue()">에필로그 다시보기</button>
+  </div>
 
   <!-- 탭 -->
   <nav class="tab-nav">
@@ -161,7 +217,7 @@
 </div>
 
 <!-- ════════════════════════════════
-  화면 3: 최종 결과
+  화면 4: 최종 결과
 ════════════════════════════════ -->
 <div id="screen-result" class="screen">
   <div class="result-hero">

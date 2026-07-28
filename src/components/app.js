@@ -16,7 +16,31 @@ let appState = {
   stats: { ...DEFAULT_STATS },
   history: [],
   notes: [],
+  introSeen: false,
 };
+
+const EPILOGUE_STEPS = [
+  {
+    narration: '첫 발령을 받고 처음 도착한 병동. 낯선 공간 속에서 긴장한 마음으로 주변을 둘러봅니다.',
+    head: '',
+    player: '',
+  },
+  {
+    narration: '',
+    head: '어서 와요. 오늘부터 이 병동에서 함께할 {name} 간호사죠? 많이 긴장됐을 텐데, 잘 왔어요.',
+    player: '',
+  },
+  {
+    narration: '',
+    head: '',
+    player: '{name}입니다. 잘 부탁드립니다. 많이 배우겠습니다.',
+  },
+  {
+    narration: '',
+    head: '환영해요. 처음은 누구나 서툴러요. 오늘의 첫 퀘스트부터 차근차근 함께 시작해봐요.',
+    player: '',
+  },
+];
 
 // ── 저장/로드 ──
 function saveState() {
@@ -35,21 +59,112 @@ function loadState() {
 }
 
 // ── 시작 ──
+function clearStartError() {
+  const input = document.getElementById('nurseNameInput');
+  const error = document.getElementById('startFormError');
+  if (input) {
+    input.classList.remove('input-error');
+    input.removeAttribute('aria-invalid');
+  }
+  if (error) error.textContent = '';
+}
+
 function startApp() {
   const input = document.getElementById('nurseNameInput');
   const name  = input.value.trim();
-  if (!name) { input.focus(); return; }
+  if (!name) {
+    const error = document.getElementById('startFormError');
+    if (error) error.textContent = '이름이나 닉네임을 입력해 주세요.';
+    input.classList.add('input-error');
+    input.setAttribute('aria-invalid', 'true');
+    input.focus();
+    return;
+  }
+  clearStartError();
   appState.name = name;
+  appState.introSeen = false;
   saveState();
-  showApp();
+  showEpilogue();
+}
+
+function showStartScreen() {
+  document.getElementById('screen-app').classList.remove('active');
+  document.getElementById('screen-epilogue').classList.remove('active');
+  document.getElementById('screen-result').classList.remove('active');
+  document.getElementById('screen-start').classList.add('active');
+  const input = document.getElementById('nurseNameInput');
+  if (input && appState.name) input.value = appState.name;
+  clearStartError();
 }
 
 function showApp() {
+  document.getElementById('screen-epilogue')?.classList.remove('active');
   document.getElementById('screen-start').classList.remove('active');
   document.getElementById('screen-app').classList.add('active');
   document.getElementById('hudName') && (document.getElementById('hudName').textContent = appState.name);
   updateHUD();
   updateMap();
+}
+
+let epilogueStep = 0;
+
+function renderEpilogueStep() {
+  const step = EPILOGUE_STEPS[epilogueStep];
+  const narrationEl = document.getElementById('epilogueNarration');
+  const headEl = document.getElementById('epilogueHeadBubble');
+  const playerEl = document.getElementById('epiloguePlayerBubble');
+  const narrationTextEl = document.getElementById('epilogueNarrationText');
+  const headTextEl = document.getElementById('epilogueHeadText');
+  const playerSpeakerEl = document.getElementById('epiloguePlayerSpeaker');
+  const playerTextEl = document.getElementById('epiloguePlayerText');
+  const nextBtn = document.getElementById('epilogueNextBtn');
+
+  const nurseName = appState.name || '이새싹';
+  const headText = (step.head || '').replaceAll('{name}', nurseName);
+  const playerText = (step.player || '').replaceAll('{name}', nurseName);
+
+  narrationTextEl.textContent = step.narration || '';
+  headTextEl.textContent = headText;
+  playerSpeakerEl.textContent = nurseName;
+  playerTextEl.textContent = playerText || '';
+
+  narrationEl.classList.toggle('show', Boolean(step.narration));
+  headEl.classList.toggle('show', Boolean(headText));
+  playerEl.classList.toggle('show', Boolean(playerText));
+
+  document.querySelectorAll('.epi-dot').forEach((dot, idx) => {
+    dot.classList.toggle('active', idx <= epilogueStep);
+  });
+
+  nextBtn.textContent = epilogueStep === EPILOGUE_STEPS.length - 1 ? '퀘스트 맵으로 가기 →' : '다음';
+}
+
+function showEpilogue() {
+  document.getElementById('screen-start').classList.remove('active');
+  document.getElementById('screen-app').classList.remove('active');
+  document.getElementById('screen-result').classList.remove('active');
+  document.getElementById('screen-epilogue').classList.add('active');
+  epilogueStep = 0;
+  renderEpilogueStep();
+}
+
+function finishEpilogue() {
+  appState.introSeen = true;
+  saveState();
+  showApp();
+}
+
+function nextEpilogueStep() {
+  if (epilogueStep >= EPILOGUE_STEPS.length - 1) {
+    finishEpilogue();
+    return;
+  }
+  epilogueStep += 1;
+  renderEpilogueStep();
+}
+
+function skipEpilogue() {
+  finishEpilogue();
 }
 
 // ── HUD ──
@@ -384,6 +499,7 @@ function refreshAll() {
 (function init() {
   loadState();
   if (appState.name) {
-    showApp();
+    if (appState.introSeen) showApp();
+    else showEpilogue();
   }
 })();
