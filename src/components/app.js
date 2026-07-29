@@ -183,8 +183,88 @@ function updateHUD() {
 // ── 퀘스트 맵 ──
 function updateMap() {
   const cleared    = appState.clearedQuests || [];
+  const xp         = appState.totalXP || 0;
+  const info       = getStageInfo(xp);
+  const stats      = appState.stats || DEFAULT_STATS;
+  const persona    = getPersona(appState.tagCounts || {});
+  const topStats   = Object.entries(stats).sort((a,b)=>b[1]-a[1]).slice(0,3);
   const listEl     = document.getElementById('chapterList');
 
+  // ── 상단 성장 요약 패널 ──
+  let html = `
+  <div style="
+    background:#fff;
+    border:1px solid #f0e8de;
+    border-radius:18px;
+    padding:16px;
+    margin-bottom:16px;
+    display:flex;
+    gap:14px;
+    align-items:center;
+  ">
+    <!-- 캐릭터 미니 -->
+    <img src="${info.img}" alt="내 캐릭터" style="
+      width:72px;height:90px;
+      object-fit:contain;
+      flex-shrink:0;
+      filter:drop-shadow(0 4px 8px rgba(196,112,74,.2));
+    "/>
+
+    <div style="flex:1;min-width:0;">
+      <!-- 스테이지 배지 -->
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
+        <span style="
+          font-size:11px;font-weight:700;
+          background:linear-gradient(135deg,#c4704a,#e8904a);
+          color:#fff;padding:2px 10px;border-radius:20px;
+        ">STAGE ${info.stage}</span>
+        <span style="font-size:13px;font-weight:700;color:#3d2b1f;">${info.title}</span>
+      </div>
+
+      <!-- XP 바 -->
+      <div style="margin-bottom:8px;">
+        <div style="display:flex;justify-content:space-between;margin-bottom:3px;">
+          <span style="font-size:10px;color:#b0957e;">경험치</span>
+          <span style="font-size:10px;color:#b0957e;">${xp} / ${info.nextXP} XP</span>
+        </div>
+        <div style="height:4px;background:#f0e8de;border-radius:2px;overflow:hidden;">
+          <div style="height:100%;width:${info.pct}%;background:linear-gradient(90deg,#c4704a,#e8904a);border-radius:2px;transition:width .6s;"></div>
+        </div>
+      </div>
+
+      <!-- 강점 TOP 3 -->
+      <div style="display:flex;gap:5px;flex-wrap:wrap;margin-bottom:8px;">
+        ${topStats.map(([name], i) => `
+          <span style="
+            font-size:11px;
+            background:${i===0?'#fff0e8':'#fdf8f3'};
+            border:1px solid ${i===0?'#f0d8c8':'#f0e8de'};
+            color:${i===0?'#c4704a':'#8b6f5e'};
+            padding:2px 9px;border-radius:20px;
+            font-weight:${i===0?'700':'400'};
+          ">${i===0?'⭐ ':''}${name}</span>
+        `).join('')}
+      </div>
+
+      <!-- 간호 철학 한 줄 -->
+      <div style="
+        font-size:11px;
+        color:#8b6f5e;
+        font-style:italic;
+        line-height:1.5;
+        background:#fdf8f3;
+        border-left:2px solid #f0d8c8;
+        padding:5px 8px;
+        border-radius:0 6px 6px 0;
+        overflow:hidden;
+        display:-webkit-box;
+        -webkit-line-clamp:2;
+        -webkit-box-orient:vertical;
+      ">${cleared.length > 0 ? '"' + persona.philosophy.split('\n')[0] + '"' : '퀘스트를 클리어하면 나만의 간호 철학이 완성돼요 ✦'}</div>
+    </div>
+  </div>`;
+
+  // ── 챕터 목록 ──
   const chapterMap = {};
   QUESTS.forEach(q => {
     if (!chapterMap[q.chapter]) chapterMap[q.chapter] = [];
@@ -192,7 +272,6 @@ function updateMap() {
   });
 
   const chapterIds = Object.keys(chapterMap).map(Number).sort((a,b)=>a-b);
-  let html = '';
 
   chapterIds.forEach(chId => {
     const ch      = CHAPTERS.find(c => c.id === chId);

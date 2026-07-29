@@ -30,13 +30,13 @@ function closeModalOutside(e) {
 }
 
 function renderStep() {
-  const quest     = currentQuest;
-  const step      = quest.steps[currentStep];
-  const total     = quest.steps.length;
-  const body      = document.getElementById('modalBody');
-  const stageInfo = getStageInfo(appState.totalXP || 0);
-  const nurseImg  = stageInfo.img;
-  const bgImg     = quest.bg || 'images/backgrounds/room.png';
+  const quest      = currentQuest;
+  const step       = quest.steps[currentStep];
+  const total      = quest.steps.length;
+  const body       = document.getElementById('modalBody');
+  const stageInfo  = getStageInfo(appState.totalXP || 0);
+  const nurseImg   = stageInfo.img;
+  const bgImg      = quest.bg || 'images/backgrounds/room.png';
   const patientImg = quest.patientImg || null;
 
   let html = '';
@@ -59,117 +59,70 @@ function renderStep() {
     </div>`;
   }
 
-  // ── 메인 씬: 병원 배경 ──
-  html += `<div style="border-radius:20px;overflow:hidden;margin-bottom:14px;box-shadow:0 4px 20px rgba(0,0,0,.08);">`;
+  html += `<div class="quest-scene">`;
 
-  // 병원 배경 스테이지
-  html += `<div style="
-    position:relative;
-    height:260px;
-    background-image:url('${bgImg}');
-    background-size:cover;
-    background-position:center;
-    display:flex;
-    flex-direction:column;
-    justify-content:space-between;
-  ">`;
-
-  // 상단 말풍선 (상황 + 환자 대사)
+  // 말풍선 (캐릭터와 분리)
   if (step.scenario || step.quote) {
-    html += `<div style="padding:14px 14px 0;">`;
+    html += `<div class="quest-bubbles">`;
     if (step.scenario) {
-      html += `<div style="
-        background:rgba(255,255,255,.92);
-        border-radius:14px 14px 14px 4px;
-        padding:10px 14px;
-        font-size:13px;
-        color:#3d2b1f;
-        line-height:1.6;
-        max-width:80%;
-        box-shadow:0 2px 10px rgba(0,0,0,.1);
-        margin-bottom:${step.quote?'8px':'0'};
-      ">
-        <div style="font-size:10px;font-weight:700;color:#b0957e;margin-bottom:3px;">📍 상황</div>
+      html += `<div class="quest-bubble quest-bubble-scene">
+        <div class="quest-bubble-label">📍 상황</div>
         ${step.scenario}
       </div>`;
     }
     if (step.quote) {
-      html += `<div style="
-        background:rgba(255,245,236,.95);
-        border:1.5px solid #f0d8c8;
-        border-radius:14px 14px 14px 4px;
-        padding:10px 14px;
-        font-size:14px;
-        color:#c4704a;
-        font-style:italic;
-        line-height:1.7;
-        max-width:75%;
-        box-shadow:0 2px 10px rgba(196,112,74,.15);
-      ">
-        <div style="font-size:10px;font-weight:700;color:#b0957e;margin-bottom:3px;font-style:normal;">💬 환자</div>
+      html += `<div class="quest-bubble quest-bubble-quote">
+        <div class="quest-bubble-label">💬 환자</div>
         ${step.quote}
       </div>`;
     }
     html += `</div>`;
   }
 
-  // 하단 캐릭터들
-  html += `<div style="
-    display:flex;
-    align-items:flex-end;
-    justify-content:center;
-    gap:16px;
-    padding:0 20px;
-  ">`;
-
-  // 환자 이미지
-  if (patientImg) {
-    html += `<img src="${patientImg}" alt="환자" style="
-      height:180px;
-      width:auto;
-      object-fit:contain;
-      filter:drop-shadow(0 4px 12px rgba(0,0,0,.2));
-    "/>`;
-  }
-
-  // 간호사 이미지
-  html += `<img src="${nurseImg}" alt="간호사" style="
-    height:200px;
-    width:auto;
-    object-fit:contain;
-    filter:drop-shadow(0 4px 12px rgba(196,112,74,.25));
-  "/>`;
-
-  html += `</div>`; // 캐릭터
-  html += `</div>`; // 배경
-
-  // 바이탈 + 관찰
+  // 바이탈/관찰 — 캐릭터 위에 따로 배치해 가리지 않음
   if (step.vitals || (step.observations && step.observations.length)) {
-    html += `<div style="background:#fff;border-left:1px solid #f0e8de;border-right:1px solid #f0e8de;padding:12px 16px;">`;
+    html += `<div class="quest-clinical">`;
     if (step.vitals) {
-      html += `<div style="display:flex;gap:6px;flex-wrap:wrap;${step.observations?'margin-bottom:8px;':''}">`;
+      html += `<div class="quest-vitals">`;
       step.vitals.forEach(v => {
         const valColor = v.state==='danger'?'#c0392b':v.state==='warn'?'#b07000':'#3a7a3a';
-        html += `<div style="background:#fdf8f3;border:1px solid #f0e8de;border-radius:8px;padding:7px 10px;min-width:68px;">
-          <div style="font-size:10px;color:#b0957e;margin-bottom:2px;">${v.label}</div>
-          <div style="font-size:16px;font-weight:700;color:${valColor};">${v.value}</div>
+        html += `<div class="quest-vital-card">
+          <div class="quest-vital-label">${v.label}</div>
+          <div class="quest-vital-value" style="color:${valColor};">${v.value}</div>
         </div>`;
       });
       html += `</div>`;
     }
     if (step.observations && step.observations.length) {
-      html += `<div style="display:flex;flex-wrap:wrap;gap:5px;">`;
+      html += `<div class="quest-obs">`;
       step.observations.forEach(o => {
-        html += `<span style="font-size:11px;background:#fff0ee;color:#c04030;border:1px solid #f8d0cc;padding:3px 9px;border-radius:20px;">${o}</span>`;
+        html += `<span class="quest-obs-tag">${o}</span>`;
       });
       html += `</div>`;
     }
     html += `</div>`;
   }
 
-  // 선택지 패널
-  html += `<div style="background:#fff5ec;border:1px solid #f0e8de;border-top:none;border-radius:0 0 20px 20px;padding:14px 16px 16px;">
-    <div style="font-size:12px;font-weight:700;color:#b0957e;margin-bottom:10px;letter-spacing:.04em;">나라면 어떻게 할까요?</div>
+  // 배경 스테이지: 배경(80% 불투명) + 상체 캐릭터
+  html += `<div class="quest-stage">
+    <div class="quest-stage-bg" style="background-image:url('${bgImg}');"></div>
+    <div class="quest-stage-chars">`;
+
+  if (patientImg) {
+    html += `<div class="quest-char quest-char-patient" aria-label="환자">
+      <img src="${patientImg}" alt="환자"/>
+    </div>`;
+  }
+
+  html += `<div class="quest-char quest-char-nurse" aria-label="간호사">
+      <img src="${nurseImg}" alt="간호사"/>
+    </div>`;
+
+  html += `</div></div>`;
+
+  // 선택지
+  html += `<div class="quest-options">
+    <div class="quest-options-label">나라면 어떻게 할까요?</div>
     <div id="optionList" style="display:flex;flex-direction:column;gap:8px;">
       ${step.options.map((opt,i)=>`
         <button class="opt-btn" onclick="chooseOption(${i})">${opt.text}</button>
@@ -177,7 +130,7 @@ function renderStep() {
     </div>
   </div>`;
 
-  html += `</div>`; // 전체 씬 카드
+  html += `</div>`;
 
   html += `<div id="feedbackArea"></div>`;
   body.innerHTML = html;
