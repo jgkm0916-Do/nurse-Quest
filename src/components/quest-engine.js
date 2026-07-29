@@ -61,25 +61,12 @@ function renderStep() {
 
   html += `<div class="quest-scene">`;
 
-  // 말풍선 (캐릭터와 분리)
-  if (step.scenario || step.quote) {
-    html += `<div class="quest-bubbles">`;
-    if (step.scenario) {
-      html += `<div class="quest-bubble quest-bubble-scene">
-        <div class="quest-bubble-label">📍 상황</div>
-        ${step.scenario}
-      </div>`;
-    }
-    if (step.quote) {
-      html += `<div class="quest-bubble quest-bubble-quote">
-        <div class="quest-bubble-label">💬 환자</div>
-        ${step.quote}
-      </div>`;
-    }
-    html += `</div>`;
+  // 상황 설명 — 씬 위 작은 텍스트
+  if (step.scenario) {
+    html += `<div class="quest-scenario-line">📍 ${step.scenario}</div>`;
   }
 
-  // 바이탈/관찰 — 캐릭터 위에 따로 배치해 가리지 않음
+  // 바이탈/관찰
   if (step.vitals || (step.observations && step.observations.length)) {
     html += `<div class="quest-clinical">`;
     if (step.vitals) {
@@ -103,10 +90,24 @@ function renderStep() {
     html += `</div>`;
   }
 
-  // 배경 스테이지: 배경(80% 불투명) + 상체 캐릭터
+  // VN 스테이지: 배경 + 양옆 캐릭터 + 말풍선
+  const nurseThought = step.nurseThought || '어떡하지..?';
   html += `<div class="quest-stage">
-    <div class="quest-stage-bg" style="background-image:url('${bgImg}');"></div>
-    <div class="quest-stage-chars">`;
+    <div class="quest-stage-bg" style="background-image:url('${bgImg}');"></div>`;
+
+  if (step.quote) {
+    html += `<div class="quest-vn-bubble quest-vn-bubble-patient">
+      <div class="quest-vn-bubble-label">환자</div>
+      <div class="quest-vn-bubble-text">${step.quote}</div>
+    </div>`;
+  }
+
+  html += `<div class="quest-vn-bubble quest-vn-bubble-nurse">
+    <div class="quest-vn-bubble-label">나</div>
+    <div class="quest-vn-bubble-text">${nurseThought}</div>
+  </div>`;
+
+  html += `<div class="quest-stage-chars${patientImg ? ' has-patient' : ''}">`;
 
   if (patientImg) {
     html += `<div class="quest-char quest-char-patient" aria-label="환자">
