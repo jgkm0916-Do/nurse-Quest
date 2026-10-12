@@ -512,17 +512,35 @@ function goBackToMap() {
 }
 
 // ── 레벨업 팝업 ──
+function stageImageSources(info) {
+  const stageNum = info.stage;
+  return [
+    info.img,
+    'images/Stage' + stageNum + '.png',
+    'images/stages/stage' + stageNum + '.png',
+  ].filter((src, index, list) => src && list.indexOf(src) === index);
+}
+
 function showLevelUp(stageNum) {
   const info = STAGES.find(s => s.stage === stageNum);
   if (!info) return;
 
-  document.getElementById('luCharImg').src        = info.img;
+  const overlay = document.getElementById('levelupOverlay');
+  overlay.classList.add('show');
+
+  const img = document.getElementById('luCharImg');
+  const sources = stageImageSources(info);
+  let sourceIndex = 0;
+  img.alt = info.title;
+  img.onerror = function () {
+    sourceIndex += 1;
+    if (sourceIndex < sources.length) img.src = sources[sourceIndex];
+  };
+  img.src = sources[0];
+
   document.getElementById('luStageNum').textContent = stageNum;
   document.getElementById('luStageName').textContent = info.title;
   document.getElementById('luStageDesc').textContent = info.desc;
-
-  const overlay = document.getElementById('levelupOverlay');
-  overlay.classList.add('show');
 
   // 파티클
   spawnParticles();

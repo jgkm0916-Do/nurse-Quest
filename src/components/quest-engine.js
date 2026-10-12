@@ -4,6 +4,17 @@
 
 let currentQuest = null;
 let currentStep  = 0;
+let completingQuest = false;
+let advancingStep = false;
+
+function isQuestCleared(questId) {
+  return (appState.clearedQuests || []).includes(questId);
+}
+
+function stepQuestionText(step) {
+  const question = step && step.question != null ? String(step.question).trim() : '';
+  return question || '나라면 어떻게 할까요?';
+}
 
 function openQuest(questId) {
   const quest = QUESTS.find(q => q.id === questId);
@@ -12,6 +23,8 @@ function openQuest(questId) {
   if (node && node.classList.contains('locked')) return;
   currentQuest = quest;
   currentStep  = 0;
+  completingQuest = false;
+  advancingStep = false;
   document.getElementById('modalMeta').textContent  = `Chapter ${quest.chapter} · 난이도 ${'⭐'.repeat(quest.difficulty)}`;
   document.getElementById('modalTitle').textContent = quest.title;
   renderStep();
@@ -23,6 +36,8 @@ function closeModal() {
   document.getElementById('questModal').classList.remove('open');
   document.body.style.overflow = '';
   currentQuest = null; currentStep = 0;
+  completingQuest = false;
+  advancingStep = false;
 }
 
 function closeModalOutside(e) {
@@ -38,13 +53,18 @@ function renderStep() {
   const nurseImg   = stageInfo.img;
   const bgImg      = quest.bg || 'images/backgrounds/room.png';
   const patientImg = quest.patientImg || null;
+  const isReview   = isQuestCleared(quest.id);
 
   let html = '';
 
-  // XP + 난이도
-  html += `<div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;">
-    <span style="font-size:11px;font-weight:700;background:#fff0e8;color:#c4704a;border:1px solid #f0d8c8;padding:3px 10px;border-radius:20px;">+${quest.xp} XP</span>
-    <span style="font-size:11px;color:#b0957e;">난이도 ${'⭐'.repeat(quest.difficulty)}</span>
+  // XP + 난이도 (이미 완료한 퀘스트는 복습 안내)
+  html += `<div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;">`;
+  if (isReview) {
+    html += `<span style="font-size:11px;font-weight:700;background:#f6f1eb;color:#8b6f5e;border:1px solid #e8ddd2;padding:3px 10px;border-radius:20px;">복습 · 경험치 지급 없음</span>`;
+  } else {
+    html += `<span style="font-size:11px;font-weight:700;background:#fff0e8;color:#c4704a;border:1px solid #f0d8c8;padding:3px 10px;border-radius:20px;">+${quest.xp} XP</span>`;
+  }
+  html += `<span style="font-size:11px;color:#b0957e;">난이도 ${'⭐'.repeat(quest.difficulty)}</span>
   </div>`;
 
   // 진행 점
@@ -121,9 +141,9 @@ function renderStep() {
 
   html += `</div></div>`;
 
-  // 선택지
+  // 선택지 — 상황별 question, 없으면 기본 문구
   html += `<div class="quest-options">
-    <div class="quest-options-label">나라면 어떻게 할까요?</div>
+    <div class="quest-options-label">${stepQuestionText(step)}</div>
     <div id="optionList" style="display:flex;flex-direction:column;gap:8px;">
       ${step.options.map((opt,i)=>`
         <button class="opt-btn" onclick="chooseOption(${i})">${opt.text}</button>
@@ -178,40 +198,56 @@ function chooseOption(idx) {
 }
 
 function nextStep() {
+  if (!currentQuest || completingQuest || advancingStep) return;
+  advancingStep = true;
+  const nextBtn = document.querySelector('#feedbackArea .btn-next');
+  if (nextBtn) nextBtn.disabled = true;
   if (currentStep < currentQuest.steps.length-1) {
     currentStep++;
     renderStep();
-    document.querySelector('.modal-sheet').scrollTop = 0;
+    const sheet = document.querySelector('.modal-sheet');
+    if (sheet) sheet.scrollTop = 0;
+    advancingStep = false;
   } else {
     completeQuest(currentQuest);
   }
 }
 
 function completeQuest(quest) {
-  const prevXP    = appState.totalXP || 0;
-  appState.totalXP = prevXP + quest.xp;
-  appState.clearedQuests = appState.clearedQuests || [];
-  if (!appState.clearedQuests.includes(quest.id)) appState.clearedQuests.push(quest.id);
-  appState.history = appState.history || [];
-  appState.history.unshift({questTitle:quest.title, xp:quest.xp, date:new Date().toLocaleDateString('ko-KR')});
-  if (appState.history.length>30) appState.history.pop();
-  appState.notes = appState.notes || [];
-  if (!appState.notes.find(n=>n.questId===quest.id)) appState.notes.unshift({questId:quest.id,...quest.note});
-  saveState();
+  if (!quest || completingQuest) return;
+  completingQuest = true;
 
-  const prevStage = getStageNum(prevXP);
-  const newStage  = getStageNum(appState.totalXP);
+  const prevXP = appState.totalXP || 0;
+  appState.clearedQuests = appState.clearedQuests || [];
+  const alreadyCleared = appState.clearedQuests.includes(quest.id);
+
+  if (!alreadyCleared) {
+    appState.totalXP = prevXP + quest.xp;
+    appState.clearedQuests.push(quest.id);
+    appState.history = appState.history || [];
+    appState.history.unshift({questTitle:quest.title, xp:quest.xp, date:new Date().toLocaleDateString('ko-KR')});
+    if (appState.history.length>30) appState.history.pop();
+    appState.notes = appState.notes || [];
+    if (!appState.notes.find(n=>n.questId===quest.id)) appState.notes.unshift({questId:quest.id,...quest.note});
+    saveState();
+  }
+
+  const newStage = getStageNum(appState.totalXP || 0);
+  const rewardHtml = alreadyCleared
+    ? `<div class="qd-xp" style="font-size:16px;">복습 · 경험치 지급 없음</div>
+      <div class="qd-xp-sub">이미 완료한 퀘스트예요</div>`
+    : `<div class="qd-xp">+${quest.xp} XP</div>
+      <div class="qd-xp-sub">획득</div>`;
 
   document.getElementById('modalBody').innerHTML = `
     <div class="quest-done">
       <div class="qd-icon">🎉</div>
       <div class="qd-title">퀘스트 클리어!</div>
       <div class="qd-body">${quest.note.body.split('\n')[0]}</div>
-      <div class="qd-xp">+${quest.xp} XP</div>
-      <div class="qd-xp-sub">획득</div>
+      ${rewardHtml}
       <button class="btn-primary" style="max-width:200px;margin:0 auto;" onclick="closeModal();refreshAll();">맵으로 돌아가기</button>
     </div>`;
 
   updateHUD(); updateMap();
-  if (newStage > prevStage) setTimeout(()=>showLevelUp(newStage), 700);
+  if (!alreadyCleared && newStage > getStageNum(prevXP)) setTimeout(()=>showLevelUp(newStage), 700);
 }

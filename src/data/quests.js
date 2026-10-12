@@ -238,7 +238,7 @@ const QUESTS = [
           {label:'혈압',        value:'142/88',   state:'warn'},
           {label:'부종',        value:'양측 하지',state:'warn'},
         ],
-        observations:['하지 부종','8시간 소변 80mL','카테터 연결됨'],
+        observations:['하지 부종','8시간 소변 80mL','유치도뇨관 유지 중'],
         question:'가장 먼저 확인해야 할 것은?',
         options:[
           {text:'수분 섭취량을 늘리도록 물을 더 마시게 한다.', correct:false, tags:['행동형']},
