@@ -678,7 +678,8 @@ button,input,textarea,select{font-family:var(--font);}
 
 .quest-stage{
   position:relative;
-  height:320px;
+  height:auto;
+  min-height:280px;
   overflow:hidden;
   background:#e8ddd2;
   isolation:isolate;
@@ -695,12 +696,13 @@ button,input,textarea,select{font-family:var(--font);}
 .quest-stage-chars{
   position:relative;
   z-index:1;
-  height:100%;
+  height:auto;
+  min-height:280px;
   display:flex;
   align-items:flex-end;
   justify-content:flex-end;
   gap:8px;
-  padding:72px 6px 0;
+  padding:84px 8px 8px;
   box-sizing:border-box;
   pointer-events:none;
 }
@@ -728,15 +730,17 @@ button,input,textarea,select{font-family:var(--font);}
   height:300px;
 }
 .quest-char-patient{
-  width:156px;
-  height:208px;
+  width:46%;
+  max-width:220px;
+  height:auto;
   overflow:visible;
   border-radius:0;
   background:transparent;
+  flex-shrink:1;
 }
 .quest-char-patient img{
   width:100%;
-  height:100%;
+  height:auto;
   object-fit:contain;
   object-position:center bottom;
 }
