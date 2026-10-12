@@ -187,10 +187,13 @@ function chooseOption(idx) {
   });
 
   const isLast = currentStep === currentQuest.steps.length-1;
+  const feedbackText = isCorrect
+    ? step.feedbackCorrect
+    : (step.options[idx].feedback || step.feedbackWrong);
   document.getElementById('feedbackArea').innerHTML = `
     <div class="feedback ${isCorrect?'correct':'wrong'}" style="margin-top:14px;">
       <div class="fb-title">${isCorrect?'✓ 정답!':'✗ 다시 생각해봐요'}</div>
-      <div>${isCorrect?step.feedbackCorrect:step.feedbackWrong}</div>
+      <div>${feedbackText}</div>
     </div>
     <div style="text-align:right;margin-top:12px;">
       <button class="btn-next" onclick="nextStep()">${isLast?'퀘스트 완료! 🎉':'다음 상황 →'}</button>
